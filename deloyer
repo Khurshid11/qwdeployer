@@ -1,0 +1,15 @@
+#!/bin/bash
+# Bash Menu Script Example
+
+# Text Formating
+txtgrn=$(tput setaf 2) # Green
+txtwht=$(tput setaf 7) # White
+txtblu=$(tput setaf 4) # Blue
+txtrst=$(tput sgr0) # Text reset.
+txtbold=$(tput bold) # Text Bold
+txtred=$(tput setaf 1) # red
+txtyellow=$(tput setaf 3) # yellow
+
+TXT_START="$txtblu[START]$txtrst";
+TXT_FINISH="${txtyellow}FINISHED${txtrst}";
+TXT_ERROR="${txtred}ERROR OCCURRED:${txtrst}";
