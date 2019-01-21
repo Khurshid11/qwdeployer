@@ -13,3 +13,26 @@ txtyellow=$(tput setaf 3) # yellow
 TXT_START="$txtblu[START]$txtrst";
 TXT_FINISH="${txtyellow}FINISHED${txtrst}";
 TXT_ERROR="${txtred}ERROR OCCURRED:${txtrst}";
+
+# project specific settings
+PROJ_NAME=''
+PROJ_PATH=''
+
+DEPLOYMENT_FULL_PATH=''
+BUILD_COMMAND=''
+RUN_COMMAND=''
+HOST_NAME=''
+RC_NAME=''
+
+#Handle error status
+function error_exit
+{
+ echo "$TXT_ERROR$1$txtrst" | 1>&2
+ exit 1
+}
+
+function main() {
+    error_exit "Not a valid project:(" 
+}
+
+main
