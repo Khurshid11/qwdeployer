@@ -31,8 +31,42 @@ function error_exit
  exit 1
 }
 
+function selectHost() {
+  echo ""
+  echo ${txtyellow}
+  echo "PLease select Host .."
+  echo "1. Development"
+  echo "2. Testing"
+  echo "---------------"
+  echo "99. ALL"
+  
+  echo ${txtrst}
+  while :
+  do
+    read INPUT_STRING
+    case $INPUT_STRING in
+	  1)
+      HOST_NAME="development"
+      break
+		  ;;
+    2)
+      HOST_NAME="testing"
+      break
+	  	;;
+    
+    99)
+      HOST_NAME="applicationstack"
+      break
+	  	;;
+    *)
+		  echo "Wrong input supplied"
+		  ;;
+     esac
+  done  
+}
+
 function main() {
-    error_exit "Not a valid project:(" 
+   selectHost || error_exit "Not a valid host:("
 }
 
 main
