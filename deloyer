@@ -38,7 +38,7 @@ function selectHost() {
   echo "1. Development"
   echo "2. Testing"
   echo "---------------"
-  echo "99. ALL"
+  echo "3. ALL"
   
   echo ${txtrst}
   while :
@@ -54,7 +54,7 @@ function selectHost() {
       break
 	  	;;
     
-    99)
+    3)
       HOST_NAME="applicationstack"
       break
 	  	;;
@@ -65,8 +65,141 @@ function selectHost() {
   done  
 }
 
+function selectProject() {
+  
+  echo "Please select the project ..."
+  echo ${txtyellow}
+  echo "1. ums"
+  echo "2. ppixxells"
+  echo "3. pizzar"
+  echo ${txtrst}
+while :
+do
+  read INPUT_STRING
+  case $INPUT_STRING in
+	1)
+		echo "Deploying ums!"
+    PROJ_NAME="ums"
+    break
+		;;
+  2)
+		echo "Deploying Ppixxells!"
+    PROJ_NAME="ppixxells"
+    break
+		;;
+  3)
+		echo "Deploying Pizzar!"
+    PROJ_NAME="pizzar"
+    break
+		;;
+  
+	*)
+		echo "Wrong input supplied"
+		;;
+  esac
+done
+}
+
+ function fetchTags() {
+  #echo "Fetching RC list from: ";
+  #echo "git fetch --tags git@github.com:Khurshid11/$PROJ_NAME.git";
+   git fetch --tags git@github.com:Khurshid11/$PROJ_NAME.git 
+   if [ "$?" != "0" ]; then
+      return 1
+    fi
+    return 0
+ } 
+
+function checkoutToProject() {
+    rm -rf "/workspace/$PROJ_NAME"    
+    cd "/workspace"
+    git clone git@github.com:Khurshid11/$PROJ_NAME.git
+    if [ "$?" != "0" ]; then
+      return 1
+    fi
+    return 0
+ }
+
+ function showExistingRc() {
+  echo "fetching RC list"
+  echo "Please wait ...."
+
+  
+  cd "/workspace/$PROJ_NAME"
+  
+  fetchTags
+  if [ "$?" != "0" ]; then
+      cd ..
+      checkoutToProject
+      cd "/workspace/$PROJ_NAME"
+      fetchTags
+      if [ "$?" != "0" ]; then
+       return 1
+      fi
+  fi
+
+  echo "Running git fetch"
+
+  echo ${txtyellow}
+  git tag | sort -V | tail -10
+  echo ${txtrst}
+  return 0
+}
+
+function askForRcName() {
+  read -p "Enter RC Name to be deployed [ $PROJ_NAME ]: "  RC_NAME
+  if [ "$?" != "0" ]; then
+    return 1
+  fi
+  return 0
+}
+
+function deploy() {
+    echo "Checking out $RC_NAME"
+    git checkout $RC_NAME
+    if [ "$?" != "0" ]; then
+      return 1
+    fi
+    docker build --tag=Khurshid11/$PROJ_NAME:$RC_NAME . > /dev/null
+    if [ "$?" != "0" ]; then
+      return 1
+    fi
+    docker save Khurshid11/$PROJ_NAME:$RC_NAME -o $PROJ_NAME-$RC_NAME.tar
+    if [ "$?" != "0" ]; then
+      return 1
+    fi
+    
+    mkdir -p /images/$PROJ_NAME/
+    if [ "$?" != "0" ]; then
+      return 1
+    fi
+    mv /workspace/$PROJ_NAME/$PROJ_NAME-$RC_NAME.tar /images/$PROJ_NAME/$PROJ_NAME-$RC_NAME.tar
+    if [ "$?" != "0" ]; then
+      return 1
+    fi
+
+    ANSIBLE_NOCOWS=1 ansible-playbook  /opt/ansible/playbooks/Khurshid11/deploydocker.yml \
+    --extra-vars "binpath=/images/ hosts=$HOST_NAME \
+    rcname=$RC_NAME ansible_become_pass=master projname=$PROJ_NAME"
+    if [ "$?" != "0" ]; then
+      return 1
+    fi
+
+}
+
+function showsuccess() {
+  /usr/games/cowsay -f moofasa ${txtyellow}It seems you just got it correct.${txtrst}
+}
+
 function main() {
-   selectHost || error_exit "Not a valid host:("
+    selectProject || error_exit "Not a valid project:("
+    selectHost || error_exit "Not a valid host:("
+
+    showExistingRc || error_exit "Could Not Show RC list :("
+    askForRcName || error_exit "Could Not Show RC list :("
+    deploy || error_exit "Deployment failed :("
+    showsuccess
+    
 }
 
 main
