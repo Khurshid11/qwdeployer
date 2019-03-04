@@ -1,0 +1,2 @@
+---
+- include: dockerplay/deployment.yml

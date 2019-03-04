@@ -1,0 +1,60 @@
+---
+- name: Start Deployemnt Drama.
+  hosts: "{{ hosts }}"
+  remote_user: "{{ lookup('env','SSH_USER') }}"
+  tasks:
+   - name: Start Cleanup old items for HOST => {{hosts}} project => {{projname}} RC => {{rcname}}
+     file:
+       state: absent
+       path: "/tmp/{{projname}}"
+     become: yes
+   - name: Create temporary directory
+     file:
+       state: directory
+       path: "/tmp/{{projname}}"
+   - name: Transport and Extract package.
+     unarchive:
+       src: /tmp/{{projname}}-deploy/{{rcname}}.tar.bz2
+       dest: /tmp/{{projname}}
+     become: yes
+   - name: Remove if directory exists {{projname}}/{{rcname}}
+     file:
+       state: absent
+       path: "/usr/local/boutiqaat/{{projname}}/{{rcname}}"
+     become: yes
+   - name: Create fresh directory {{projname}}/{{rcname}}
+     file:
+       state: directory
+       path: "/usr/local/boutiqaat/{{projname}}/{{rcname}}"
+     become: yes
+   - name: Migrate package contents to actual location.
+     command: cp -r /tmp/{{projname}}/{{rcname}} /usr/local/boutiqaat/{{projname}}/
+     become: true
+   - name: Modify permissions.
+     command: chown -R {{ lookup('env','SSH_USER') }}:gopher /usr/local/boutiqaat/{{projname}}/{{rcname}}
+     become: true
+   - name: Switch to new RC {{rcname}}
+     command: "chdir=/usr/local/boutiqaat/{{projname}} {{ item }}"
+     with_items:
+       - unlink current
+       - ln -s {{rcname}} current
+     become: yes
+   - name: Ums specific settings
+     command: "{{ item }}"
+     with_items:
+       - /usr/local/bin/supervisorctl restart ums
+     become: yes
+     when: projname == "ums"
+   - name: Ppixxells specific settings
+     command: "{{ item }}"
+     with_items:
+       - /usr/local/bin/supervisorctl restart ppixxells
+     become: yes
+     when: projname == "ppixxells" 
+   - name: Pizzar specific settings
+     command: "{{ item }}"
+     with_items:
+       - /usr/local/bin/supervisorctl restart pizzar
+     become: yes
+     when: projname == "pizzar" 
+  

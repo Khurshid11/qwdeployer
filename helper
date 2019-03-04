@@ -1,0 +1,7 @@
+#!/bin/bash
+mkdir -p /workspace
+mkdir -p /images
+
+mkdir -p /usr/local/qwentic/ums/src/github.com/Khurshid11
+mkdir -p /usr/local/boutiqaat/ppixxells/src/github.com/Khurshid11
+mkdir -p /usr/local/boutiqaat/pizzars/src/github.com/Khurshid11

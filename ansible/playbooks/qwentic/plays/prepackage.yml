@@ -1,0 +1,16 @@
+---
+- name: Start Pre-deployment drama.
+  hosts: "localhost"
+  tasks:
+  - name: Start Cleanup old items for project => {{projname}} RC => {{rcname}}
+    file:
+      state: absent
+      path: "/tmp/{{projname}}-deploy"
+  - name: Create deployment directory for project => {{projname}} RC => {{rcname}}
+    file:
+      state: directory
+      path: "/tmp/{{projname}}-deploy/{{rcname}}"
+  - name: Move to correct location
+    command: "/bin/sh -c 'cp -r {{binpath}}/* /tmp/{{projname}}-deploy/{{rcname}}'"    
+  - name: Archive Contents for transporting to another planet
+    command: "chdir=/tmp/{{projname}}-deploy/ tar -cjf {{rcname}}.tar.bz2 {{rcname}}"

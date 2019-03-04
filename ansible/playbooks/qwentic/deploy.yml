@@ -1,0 +1,6 @@
+---
+- include: plays/prepackage.yml
+
+- include: plays/deployment.yml
+
+

@@ -17,3 +17,8 @@ RUN rm -rf go1.10.linux-amd64.tar.gz
 # Copy required files
 COPY ./.bash_aliases /root/.bash_aliases
 COPY ./deployer /root/bin/deployer
+COPY ./ansible /opt/ansible
+COPY ./etc/ansible /etc/ansible
+COPY ./bin/docker /usr/bin/docker
+COPY ./helper helper
+RUN chmod +x helper && ./helper

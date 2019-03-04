@@ -1,0 +1,26 @@
+---
+- name: Start Deployemnt Drama.
+  hosts: "{{ hosts }}"
+  remote_user: "{{ lookup('env','SSH_USER') }}"
+  tasks:
+   - name: Start Cleanup old items for HOST => {{hosts}} project => {{projname}} RC => {{rcname}}
+     file:
+       state: absent
+       path: "/tmp/{{projname}}"
+     become: yes
+   - name: Create temporary directory
+     file:
+       state: directory
+       path: "/tmp/{{projname}}"
+   - name: Transport package.
+     copy:
+       src: /images/{{projname}}/{{projname}}-{{rcname}}.tar
+       dest: /tmp/{{projname}}/{{projname}}-{{rcname}}.tar
+     become: yes
+   - name: Load Docker image.
+     command: docker image load -i /tmp/{{projname}}/{{projname}}-{{rcname}}.tar
+     become: true
+   - name: Boot Container.
+     command: /etc/boutiqaat/{{projname}}/container.start {{rcname}}
+     become: true
+  
